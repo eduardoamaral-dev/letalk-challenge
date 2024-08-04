@@ -2,6 +2,7 @@ import SimulationRequest from "../dtos/SimulationRequest"
 import Simulation from "../dtos/Simulation"
 import Installment from "../models/Installment"
 import InterestRateService from "./InterestRateService";
+import SimulationRepository from "../repositories/SimulationRepository";
 
 export default class SimulationService {
     static simulate(simulationRequest: SimulationRequest): Simulation {
@@ -14,7 +15,7 @@ export default class SimulationService {
 
         let monthCount = Math.ceil(simulationRequest.value / simulationRequest.monthlyPayment)
         let monthlyInterestRate = InterestRateService.getInterestRate(simulationRequest.uf)
-        let installments = this.calculateInstallments(simulationRequest, monthCount, monthlyInterestRate)
+        let installments = this.calculateInstallments(simulationRequest.value, simulationRequest.monthlyPayment, monthCount, monthlyInterestRate)
         let totalInterest = this.calculateTotalInterest(installments);
         let totalCost = totalInterest + simulationRequest.value;
 
@@ -29,14 +30,42 @@ export default class SimulationService {
         };
     }
 
-    static saveSimulation(){
-
+    static saveSimulation(simulation: Simulation) {
+        SimulationRepository.saveSimulation(simulation).then(r => {
+            console.info("Simulation saved successfully")
+        })
     }
 
-    private static calculateInstallments(simulationRequest: SimulationRequest, monthCount: number, interestRate: number): Installment[] {
+    static async getSimulations(includeInstallments: boolean) {
+        let simulations: Simulation[] = [];
+        await SimulationRepository.getAllLoans().then(result => {
+            simulations = result.map(s => {
+                return {
+                    value: s.value,
+                    monthlyInterestRate: s.monthlyInterest,
+                    installments: [],
+                    monthCount: s.monthCount,
+                    monthlyValue: s.monthlyValue,
+                    totalCost: s.totalCost,
+                    totalInterest: s.totalInterest
+                }
+            })
+        }).catch((e: any) => {
+            console.error(e)
+        })
+
+        if (includeInstallments){
+            simulations.forEach(simulation => {
+                simulation.installments = this.calculateInstallments(simulation.value, simulation.monthlyValue, simulation.monthCount, simulation.monthlyInterestRate)
+            })
+        }
+        return simulations;
+    }
+
+    private static calculateInstallments(simulationValue: number, monthlyPayment: number, monthCount: number, interestRate: number): Installment[] {
         let installmentList: Installment[] = []
         for (let i = 0; i <= monthCount; i++) {
-            let balanceDue = simulationRequest.value
+            let balanceDue = simulationValue
             let expiration: Date = new Date()
 
             if (installmentList.length > 0) {
@@ -47,7 +76,7 @@ export default class SimulationService {
 
             let interestValue = balanceDue * interestRate
             let newBalanceDue = balanceDue + interestValue
-            let installmentValue = newBalanceDue > simulationRequest.monthlyPayment ? simulationRequest.monthlyPayment : newBalanceDue
+            let installmentValue = newBalanceDue > monthlyPayment ? monthlyPayment : newBalanceDue
 
             expiration.setMonth(expiration.getMonth() + 1)
             installmentList.push({
