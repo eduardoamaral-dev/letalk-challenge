@@ -1,6 +1,7 @@
 export default class InterestRateService {
     static getInterestRate(uf: String) {
-        switch (uf){
+
+        switch (uf.toUpperCase()){
             default: throw new Error("Estado inválido ou indisponível")
             case "MG":return 0.01
             case "SP":return 0.008
