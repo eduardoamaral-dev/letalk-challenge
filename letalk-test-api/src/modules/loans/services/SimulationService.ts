@@ -87,7 +87,7 @@ export default class SimulationService {
             installmentValue: +installmentValue.toFixed(2)
         })
         let newInstallment: Installment | null = installmentList[installmentList.length - 1]
-        if(newInstallment!.newBalanceDue > 0){
+        if(newInstallment!.newBalanceDue > 0.01){
             this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
         }
     }
