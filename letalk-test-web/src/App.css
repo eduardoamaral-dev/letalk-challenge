@@ -1,5 +1,142 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
-* {
-  font-family: "Open Sans";
+*, p {
+    font-family: "Open Sans";
+}
+
+html {
+    background-color: #F6F6F6;
+}
+
+main {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 15px
+}
+
+form input {
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #D4D4D4;
+    font-size: 18px;
+}
+
+form input::placeholder {
+    color: #737373
+}
+
+form button {
+    background: #F3A126;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 4px 0 #87878740;
+    height: 44px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+#page-title {
+    color: #8F99A6;
+    font-weight: 300;
+    font-size: 50px;
+    margin: 50px 0 0 0;
+}
+
+.subtitle {
+    color: black;
+    font-weight: 700;
+    font-size: 20px;
+    margin: 70px 0 30px 0;
+}
+
+.white-box {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    width: 967px;
+    padding: 70px 30px 38px 30px;
+    border-radius: 5px;
+}
+
+.white-box th {
+    color: #333333;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+}
+
+.white-box td {
+    font-size: 16px;
+    font-weight: 400;
+    text-align: left;
+}
+
+.dark-n-bold {
+    color: #333333;
+    font-weight: bold;
+    font-size: 20px;
+    margin: 0
+}
+
+.result-box {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 75px 0
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+tr{
+    border-bottom: solid 1px #C4C4C4
+}
+
+td {
+    padding: 15px;
+}
+
+thead th {
+    padding: 10px;
+}
+
+.result-box * {
+    flex: 1 1 30%;
+}
+
+.result-box label {
+    color: #737373;
+    font-weight: 700;
+}
+
+h4 {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+    text-align: left;
+    color: #737373;
+    margin: 70px 0 30px 0;
+}
+
+#loan-button{
+    background-color: #21AE1E;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    border: none;
+    border-radius: 6px;
+    padding: 11px 0;
+    width: 555px;
+    margin: 50px auto auto auto;
 }

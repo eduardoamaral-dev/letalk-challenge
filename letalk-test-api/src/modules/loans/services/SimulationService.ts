@@ -12,28 +12,30 @@ export default class SimulationService {
         if (simulationRequest.value < 50000) {
             throw new Error("O valor mínimo para empréstimos é de R$ 50.000,00")
         }
+        if (simulationRequest.value < simulationRequest.monthlyPayment) {
+            throw new Error("O valor do empréstimo não pode ser menor do que o valor da parcela")
+        }
 
         let monthCount = Math.ceil(simulationRequest.value / simulationRequest.monthlyPayment)
         let monthlyInterestRate = InterestRateService.getInterestRate(simulationRequest.uf)
-        let installments = this.calculateInstallments(simulationRequest.value, simulationRequest.monthlyPayment, monthCount, monthlyInterestRate)
+        let installments :Installment[] = [];
+        this.calculateInstallments(installments, simulationRequest.value, simulationRequest.monthlyPayment, monthlyInterestRate)
         let totalInterest = this.calculateTotalInterest(installments);
         let totalCost = totalInterest + simulationRequest.value;
 
         return {
-            value: +simulationRequest.value.toFixed(2),
+            value: +(simulationRequest.value).toFixed(2),
             monthlyInterestRate,
             monthlyValue: +simulationRequest.monthlyPayment.toFixed(2),
             monthCount: +monthCount.toFixed(2),
             totalInterest: +totalInterest.toFixed(2),
             installments: installments,
-            totalCost
+            totalCost: +totalCost.toFixed(2)
         };
     }
 
-    static saveSimulation(simulation: Simulation) {
-        SimulationRepository.saveSimulation(simulation).then(r => {
-            console.info("Simulation saved successfully")
-        })
+    static saveSimulation(simulation: Simulation): Promise<void> {
+        return SimulationRepository.saveSimulation(simulation)
     }
 
     static async getSimulations(includeInstallments: boolean) {
@@ -54,40 +56,42 @@ export default class SimulationService {
             console.error(e)
         })
 
-        if (includeInstallments){
+        if (includeInstallments) {
             simulations.forEach(simulation => {
-                simulation.installments = this.calculateInstallments(simulation.value, simulation.monthlyValue, simulation.monthCount, simulation.monthlyInterestRate)
+                let installments :Installment[] = [];
+                this.calculateInstallments(installments, simulation.value, simulation.monthlyValue, simulation.monthlyInterestRate)
+                simulation.installments =installments;
             })
         }
         return simulations;
     }
 
-    private static calculateInstallments(simulationValue: number, monthlyPayment: number, monthCount: number, interestRate: number): Installment[] {
-        let installmentList: Installment[] = []
-        for (let i = 0; i <= monthCount; i++) {
-            let balanceDue = simulationValue
-            let expiration: Date = new Date()
+    private static calculateInstallments(installmentList: Installment[],simulationValue: number, monthlyPayment: number, interestRate: number){
+        let balanceDue = simulationValue
+        let expiration: Date = new Date()
 
-            if (installmentList.length > 0) {
-                let lastInstallment = installmentList[installmentList.length - 1]
-                balanceDue = lastInstallment.newBalanceDue - lastInstallment.installmentValue
-                expiration = new Date(lastInstallment.expiration)
-            }
-
-            let interestValue = balanceDue * interestRate
-            let newBalanceDue = balanceDue + interestValue
-            let installmentValue = newBalanceDue > monthlyPayment ? monthlyPayment : newBalanceDue
-
-            expiration.setMonth(expiration.getMonth() + 1)
-            installmentList.push({
-                balanceDue: +balanceDue.toFixed(2),
-                expiration,
-                interestValue: +interestValue.toFixed(2),
-                newBalanceDue: +newBalanceDue.toFixed(2),
-                installmentValue: +installmentValue.toFixed(2)
-            })
+        if (installmentList.length > 0) {
+            let lastInstallment: Installment | null = installmentList[installmentList.length - 1]
+            balanceDue = lastInstallment.newBalanceDue - lastInstallment.installmentValue
+            expiration = new Date(lastInstallment.expiration)
         }
-        return installmentList
+
+        let interestValue = balanceDue * interestRate
+        let newBalanceDue = balanceDue + interestValue
+        let installmentValue = newBalanceDue > monthlyPayment ? monthlyPayment : newBalanceDue
+
+        expiration.setMonth(expiration.getMonth() + 1)
+        installmentList.push({
+            balanceDue: +balanceDue.toFixed(2),
+            expiration,
+            interestValue: +interestValue.toFixed(2),
+            newBalanceDue: +newBalanceDue.toFixed(2),
+            installmentValue: +installmentValue.toFixed(2)
+        })
+        let newInstallment: Installment | null = installmentList[installmentList.length - 1]
+        if(newInstallment!.newBalanceDue > 0){
+            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
+        }
     }
 
     private static calculateTotalInterest(installment: Installment[]): number {
@@ -96,6 +100,10 @@ export default class SimulationService {
             result += installment.interestValue
         })
         return result
+    }
+
+    private static addMissingInstallments(lastInstallment: Installment, pendingInstallments: number) {
+        if (lastInstallment.balanceDue > 0) pendingInstallments++
     }
 
 }

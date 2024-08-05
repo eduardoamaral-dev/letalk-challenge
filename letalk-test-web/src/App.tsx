@@ -1,15 +1,13 @@
 import React from 'react';
 import './App.css';
 import Home from "./pages/Home";
-import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
-  return (
-   <>
-     <Home></Home>
-     <ToastContainer/>
-   </>
-  );
+    return (
+        <>
+            <Home></Home>
+        </>
+    );
 }
 
 export default App;
