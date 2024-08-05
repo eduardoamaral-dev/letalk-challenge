@@ -88,9 +88,6 @@ export default class SimulationService {
             installmentValue: +installmentValue.toFixed(2)
         })
         let newInstallment: Installment | null = installmentList[installmentList.length - 1]
-        if (iterationCount > 420){
-            throw new Error("O financimento excede o limite de 35 anos.")
-        }
         if (newInstallment!.newBalanceDue > 0) {
             this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate, iterationCount++)
         }
