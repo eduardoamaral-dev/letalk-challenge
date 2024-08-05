@@ -86,10 +86,10 @@ export default class SimulationService {
             newBalanceDue: +newBalanceDue.toFixed(2),
             installmentValue: +installmentValue.toFixed(2)
         })
-        let newInstallment: Installment | null = installmentList[installmentList.length - 1]
-        if (newBalanceDue > 0 && newBalanceDue !== balanceDue) {
-            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
+        if (balanceDue <= 0.1) {
+            return;
         }
+        this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
     }
 
     private static calculateTotalInterest(installment: Installment[]): number {
