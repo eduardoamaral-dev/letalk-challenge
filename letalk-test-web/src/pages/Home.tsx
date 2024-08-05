@@ -35,7 +35,6 @@ export default function Home() {
             result.monthCount = result.monthCount + 1 // because of index 0
             setSimulation(result)
         }).catch((e: any) => {
-            console.log(e)
             toast.error(e.response.data)
         })
     }
