@@ -16,7 +16,7 @@ export default class SimulationService {
             throw new Error("O valor do empréstimo não pode ser menor do que o valor da parcela")
         }
         let monthlyInterestRate = InterestRateService.getInterestRate(simulationRequest.uf)
-        let installments :Installment[] = [];
+        let installments: Installment[] = [];
         this.calculateInstallments(installments, simulationRequest.value, simulationRequest.monthlyPayment, monthlyInterestRate)
         let totalInterest = this.calculateTotalInterest(installments);
         let totalCost = totalInterest + simulationRequest.value;
@@ -56,7 +56,7 @@ export default class SimulationService {
 
         if (includeInstallments) {
             simulations.forEach(simulation => {
-                let installments :Installment[] = [];
+                let installments: Installment[] = [];
                 this.calculateInstallments(installments, simulation.value, simulation.monthlyValue, simulation.monthlyInterestRate)
                 simulation.installments = installments;
             })
@@ -64,7 +64,8 @@ export default class SimulationService {
         return simulations;
     }
 
-    private static calculateInstallments(installmentList: Installment[],simulationValue: number, monthlyPayment: number, interestRate: number){
+    private static calculateInstallments(installmentList: Installment[], simulationValue: number, monthlyPayment: number, interestRate: number, iterationCount: number = 0) {
+        const MAX_ITERATIONS = 10000;
         let balanceDue = simulationValue
         let expiration: Date = new Date()
 
@@ -87,8 +88,8 @@ export default class SimulationService {
             installmentValue: +installmentValue.toFixed(2)
         })
         let newInstallment: Installment | null = installmentList[installmentList.length - 1]
-        if(newInstallment!.newBalanceDue > 0.01 && balanceDue - installmentValue > 0.01){
-            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
+        if (newInstallment!.newBalanceDue > 0.01 && iterationCount < MAX_ITERATIONS) {
+            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate, iterationCount++)
         }
     }
 
