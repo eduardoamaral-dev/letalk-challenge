@@ -42,7 +42,7 @@ export default function Home() {
 
     async function saveSimulation() {
         let payload = simulation!;
-        payload.monthlyInterestRate = +payload.monthlyInterestRate.toString().replace(/\D/g, '');
+        payload.monthlyInterestRate = +payload.monthlyInterestRate.toString().replace(/\D/g, '')/100;
         await SimulationService.saveSimulation(simulation!).then(() => {
             toast.success("Empréstimo salvo com sucesso!")
             setTimeout(function() {

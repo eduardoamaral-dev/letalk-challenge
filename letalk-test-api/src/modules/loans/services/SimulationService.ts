@@ -15,8 +15,6 @@ export default class SimulationService {
         if (simulationRequest.value < simulationRequest.monthlyPayment) {
             throw new Error("O valor do empréstimo não pode ser menor do que o valor da parcela")
         }
-
-        let monthCount = Math.ceil(simulationRequest.value / simulationRequest.monthlyPayment)
         let monthlyInterestRate = InterestRateService.getInterestRate(simulationRequest.uf)
         let installments :Installment[] = [];
         this.calculateInstallments(installments, simulationRequest.value, simulationRequest.monthlyPayment, monthlyInterestRate)
@@ -27,7 +25,7 @@ export default class SimulationService {
             value: +(simulationRequest.value).toFixed(2),
             monthlyInterestRate,
             monthlyValue: +simulationRequest.monthlyPayment.toFixed(2),
-            monthCount: +monthCount.toFixed(2),
+            monthCount: installments.length,
             totalInterest: +totalInterest.toFixed(2),
             installments: installments,
             totalCost: +totalCost.toFixed(2)
@@ -60,7 +58,7 @@ export default class SimulationService {
             simulations.forEach(simulation => {
                 let installments :Installment[] = [];
                 this.calculateInstallments(installments, simulation.value, simulation.monthlyValue, simulation.monthlyInterestRate)
-                simulation.installments =installments;
+                simulation.installments = installments;
             })
         }
         return simulations;
