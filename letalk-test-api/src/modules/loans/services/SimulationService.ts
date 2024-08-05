@@ -64,7 +64,8 @@ export default class SimulationService {
         return simulations;
     }
 
-    private static calculateInstallments(installmentList: Installment[], simulationValue: number, monthlyPayment: number, interestRate: number) {
+    private static calculateInstallments(installmentList: Installment[], simulationValue: number, monthlyPayment: number, interestRate: number, iterationCount: number = 0) {
+        const MAX_ITERATIONS = 10000;
         let balanceDue = simulationValue
         let expiration: Date = new Date()
 
@@ -86,10 +87,13 @@ export default class SimulationService {
             newBalanceDue: +newBalanceDue.toFixed(2),
             installmentValue: +installmentValue.toFixed(2)
         })
-        if (balanceDue <= 0.1) {
-            return;
+        let newInstallment: Installment | null = installmentList[installmentList.length - 1]
+        if (iterationCount > 420){
+            throw new Error("O financimento excede o limite de 35 anos.")
         }
-        this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
+        if (newInstallment!.newBalanceDue > 0) {
+            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate, iterationCount++)
+        }
     }
 
     private static calculateTotalInterest(installment: Installment[]): number {
