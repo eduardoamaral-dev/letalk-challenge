@@ -64,8 +64,7 @@ export default class SimulationService {
         return simulations;
     }
 
-    private static calculateInstallments(installmentList: Installment[], simulationValue: number, monthlyPayment: number, interestRate: number, iterationCount: number = 0) {
-        const MAX_ITERATIONS = 10000;
+    private static calculateInstallments(installmentList: Installment[], simulationValue: number, monthlyPayment: number, interestRate: number) {
         let balanceDue = simulationValue
         let expiration: Date = new Date()
 
@@ -88,8 +87,8 @@ export default class SimulationService {
             installmentValue: +installmentValue.toFixed(2)
         })
         let newInstallment: Installment | null = installmentList[installmentList.length - 1]
-        if (newInstallment!.newBalanceDue > 1 && iterationCount < MAX_ITERATIONS) {
-            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate, iterationCount++)
+        if (newBalanceDue > 0 && newBalanceDue !== balanceDue) {
+            this.calculateInstallments(installmentList, simulationValue, monthlyPayment, interestRate)
         }
     }
 
